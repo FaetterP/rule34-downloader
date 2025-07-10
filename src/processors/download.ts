@@ -2,13 +2,16 @@ import { Job } from "bullmq";
 import { DownloadQueueData } from "../types";
 import fs from "fs";
 import Downloader from "nodejs-file-downloader";
+import { getNewDownloadPath, getIdsFilePath } from "../utils/folderManager";
 
 export function getDownloadProcessor(workerName: string) {
   return async function downloadProcessor(job: Job<DownloadQueueData>) {
     const { category, file_id, file_url } = job.data;
-    const idsFile = `./downloads/${category}/ids.txt`;
+    const idsFile = getIdsFilePath(category);
+    const downloadPath = getNewDownloadPath(category);
+    
     if (!fs.existsSync(idsFile)) {
-      fs.mkdirSync(`./downloads/${category}`);
+      fs.mkdirSync(downloadPath, { recursive: true });
       fs.closeSync(fs.openSync(idsFile, "w"));
     }
     const notDownload = fs
@@ -27,7 +30,7 @@ export function getDownloadProcessor(workerName: string) {
     console.log(`${workerName}: downloading '${category}' ${file_url}`);
     const downloader = new Downloader({
       url: job.data.file_url,
-      directory: `./downloads/${category}`,
+      directory: downloadPath,
       fileName: `${file_id}.${type}`,
     });
 

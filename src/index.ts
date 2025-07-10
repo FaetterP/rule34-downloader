@@ -1,12 +1,9 @@
 import { getPagesQueue } from "./queues/getPages";
-import fs from "node:fs";
+import { initializeDownloadFolders } from "./utils/folderManager";
 import "./workers";
 
 async function launch(categories: string[]) {
-  const downloadsFolder = `${__dirname}/../downloads`;
-  if (!fs.existsSync(downloadsFolder)) {
-    fs.mkdirSync(downloadsFolder);
-  }
+  initializeDownloadFolders();
 
   for (const category of categories) {
     getPagesQueue.add(`get pages '${categories}'`, { category });

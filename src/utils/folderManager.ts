@@ -24,33 +24,34 @@ export function initializeDownloadFolders() {
   for (const category of categories) {
     const categoryNewPath = path.join(newFolder, category);
     const categoryOldPath = path.join(oldFolder, category);
-    const idsFilePath = path.join(categoryNewPath, "ids.txt");
 
-    // Создаем папку old/{category} если её нет
     if (!fs.existsSync(categoryOldPath)) {
       fs.mkdirSync(categoryOldPath, { recursive: true });
     }
 
-    // Перемещаем все файлы кроме ids.txt
+    const downloadFiles = fs.readdirSync(categoryNewPath).filter(file => file.endsWith('.download'));
+    for (const downloadFile of downloadFiles) {
+      const downloadFilePath = path.join(categoryNewPath, downloadFile);
+      fs.unlinkSync(downloadFilePath);
+      console.log(`Deleted ${downloadFile} in new/${category}`);
+    }
+
     const files = fs.readdirSync(categoryNewPath);
     for (const file of files) {
       if (file !== "ids.txt") {
         const sourcePath = path.join(categoryNewPath, file);
         const destPath = path.join(categoryOldPath, file);
 
-        // Перемещаем файл
         fs.renameSync(sourcePath, destPath);
         console.log(`Moved ${file} from new/${category} to old/${category}`);
       }
     }
 
-    // Если папка new/{category} пустая (кроме ids.txt), удаляем её
     const remainingFiles = fs.readdirSync(categoryNewPath);
     if (
       remainingFiles.length === 0 ||
       (remainingFiles.length === 1 && remainingFiles[0] === "ids.txt")
     ) {
-      // Оставляем только ids.txt в папке new/{category}
       console.log(`Kept ids.txt in new/${category}`);
     }
   }

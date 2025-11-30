@@ -15,7 +15,11 @@ export async function parsePageProcessor(job: Job<ParsePageQueueData>) {
   );
 
   for (const imageData of xml.posts.post) {
-    const { file_url, id: file_id } = imageData["$"];
+    const { file_url, id: file_id, tags } = imageData["$"];
+    if (process.env.DISABLE_AI === "true" && tags?.includes("ai_generated")) {
+      continue;
+    }
+
     await downloadQueue.add(`download ${file_url}`, {
       file_id,
       file_url,

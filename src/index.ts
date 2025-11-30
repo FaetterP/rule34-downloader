@@ -18,7 +18,7 @@ function runRedis(categories: string[]) {
   const { getPagesQueue } = require("./queues/getPages");
   console.log("Redis queues enabled");
   for (const category of categories) {
-    getPagesQueue.add({ category });
+    getPagesQueue.add(`get-pages-${category}`, { category });
   }
 }
 
